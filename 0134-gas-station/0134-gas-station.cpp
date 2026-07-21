@@ -1,29 +1,23 @@
 class Solution {
 public:
-    bool check(vector<int>&gas,vector<int>&cost,int idx){
-        int n = gas.size();
-        int i = 0;
-        int rem_gas = 0 ;
-        while(i<n){
-            rem_gas += gas[idx] - cost[idx];
-            if(rem_gas<0) return false;
-            idx = (idx + 1)%n;
-            i++;
-        }
-        return true;
-    }
     int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
-        int n = gas.size();
-        vector<int>v;
-        for(int i = 0 ; i<n ; i++){
-            if(gas[i]-cost[i]>=0) v.push_back(i);
-        }
-        for(int i = 0 ; i<v.size() ; i++){
-            if(check(gas,cost,v[i])){
-                return v[i];
+        int start = 0;
+        int tank = 0;
+        int total = 0;
+
+        for (int i = 0; i < gas.size(); i++) {
+            int diff = gas[i] - cost[i];
+
+            tank += diff;
+            total += diff;
+
+            if (tank < 0) {
+                start = i + 1;
+                tank = 0;
             }
         }
-        return -1;
+
+        return (total >= 0) ? start : -1;
     }
 };
 
