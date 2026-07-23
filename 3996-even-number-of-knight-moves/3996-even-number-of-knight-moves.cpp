@@ -7,43 +7,38 @@ public:
         {2,-1}, {2,1}
     };
 
-    bool canReach(vector<int>& start, vector<int>& target) {
+    bool dfs(int r, int c, int parity,
+             vector<int>& target,
+             vector<vector<vector<int>>>& vis) {
 
-        queue<tuple<int,int,int>> q;
-        // row, col, parity
+        if (r == target[0] && c == target[1] && parity == 0)
+            return true;
 
-        vector<vector<vector<int>>> vis(
-            8, vector<vector<int>>(8, vector<int>(2, 0))
-        );
+        vis[r][c][parity] = 1;
 
-        q.push({start[0], start[1], 0}); // 0 moves => even parity
-        vis[start[0]][start[1]][0] = 1;
+        for (auto [dr, dc] : dir) {
+            int nr = r + dr;
+            int nc = c + dc;
+            int np = parity ^ 1;
 
-        while (!q.empty()) {
-            auto [r, c, parity] = q.front();
-            q.pop();
+            if (nr >= 0 && nr < 8 &&
+                nc >= 0 && nc < 8 &&
+                !vis[nr][nc][np]) {
 
-            if (r == target[0] && c == target[1] && parity == 0)
-                return true;
-
-            for (auto [dr, dc] : dir) {
-                int nr = r + dr;
-                int nc = c + dc;
-
-                if (nr >= 0 && nr < 8 &&
-                    nc >= 0 && nc < 8) {
-
-                    int np = parity ^ 1; // parity flips after every move
-
-                    if (!vis[nr][nc][np]) {
-                        vis[nr][nc][np] = 1;
-                        q.push({nr, nc, np});
-                    }
-                }
+                if (dfs(nr, nc, np, target, vis))
+                    return true;
             }
         }
 
         return false;
+    }
+
+    bool canReach(vector<int>& start, vector<int>& target) {
+        vector<vector<vector<int>>> vis(
+            8, vector<vector<int>>(8, vector<int>(2, 0))
+        );
+
+        return dfs(start[0], start[1], 0, target, vis);
     }
 };
 
