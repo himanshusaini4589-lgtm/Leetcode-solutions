@@ -39,18 +39,18 @@ public:
                 {
                     if(r==0||r==n-1||c==0||c==m-1) 
                     {
-                        ans = d+1;
-                        flag=!flag;
-                        break;
+                        return ans = d+1;
+                        //flag=!flag;
+                        //break;
                     }
                     q.push({{r,c},d+1});
                     vis[r][c] = 1;
                 }
             }
         }
-        return ans;
+        return -1;
     }
-//please upvote...
+
 };
 
 // Synced seamlessly with LeetHub Pro
