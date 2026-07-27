@@ -33,8 +33,8 @@ public:
             // if(cost > dist[r][c])
             //     continue;
 
-            if(r == n - 1 && c == m - 1)
-                return cost;
+            // if(r == n - 1 && c == m - 1)
+            //     return cost;
 
             for(int i = 0; i < 4; i++) {
                 int nr = r + dir[i].first;
