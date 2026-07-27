@@ -30,8 +30,8 @@ public:
             int r = curr[1];
             int c = curr[2];
 
-            if(cost > dist[r][c])
-                continue;
+            // if(cost > dist[r][c])
+            //     continue;
 
             if(r == n - 1 && c == m - 1)
                 return cost;
