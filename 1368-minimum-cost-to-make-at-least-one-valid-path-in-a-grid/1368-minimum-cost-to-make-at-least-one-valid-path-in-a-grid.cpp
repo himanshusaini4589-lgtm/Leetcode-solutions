@@ -1,38 +1,58 @@
 class Solution {
 public:
-
-    vector<pair<int,int> > dr = {{0,1},{0,-1},{1,0},{-1,0}};
-    bool check(int r ,int c ,int n ,int m){
-        return r>=0 && c>=0 && r<n && c<m;
-    }
-    int min_cost = INT_MAX;
-    void dfs(vector<vector<int> >& grid,vector<vector<bool> > &vis,int cost,int r,int c,int n,int m){
-        if(cost>= min_cost) return ;
-        if(r == n-1 && c == m-1){
-            min_cost = min(min_cost,cost);
-            return ;
-        }
-        vis[r][c] = true;
-
-        for(int i = 0 ; i<4 ; i++){
-            auto ele = dr[i];
-            int new_r = r + ele.first;
-            int new_c = c + ele.second;
-            if(!check(new_r,new_c,n,m) || vis[new_r][new_c]) continue;
-            int direction = ((grid[r][c] == i+1) ? 0 : 1);
-            int new_cost = direction + cost;
-            dfs(grid,vis,new_cost,new_r,new_c,n,m);
-        }
-
-        vis[r][c] = false;
-    }
-
     int minCost(vector<vector<int>>& grid) {
         int n = grid.size();
         int m = grid[0].size();
-        vector<vector<bool> > vis(n,vector<bool>(m,false));
-        dfs(grid,vis,0,0,0,n,m);
-        return min_cost;
+
+        vector<pair<int,int>> dir = {
+            {0,1},    
+            {0,-1},  
+            {1,0},  
+            {-1,0}   
+        };
+
+        vector<vector<int>> dist(n, vector<int>(m, INT_MAX));
+
+        priority_queue<
+            vector<int>,
+            vector<vector<int>>,
+            greater<vector<int>>
+        > pq;
+
+        dist[0][0] = 0;
+        pq.push({0, 0, 0});   // {cost, row, col}
+
+        while(!pq.empty()) {
+            auto curr = pq.top();
+            pq.pop();
+
+            int cost = curr[0];
+            int r = curr[1];
+            int c = curr[2];
+
+            if(cost > dist[r][c])
+                continue;
+
+            if(r == n - 1 && c == m - 1)
+                return cost;
+
+            for(int i = 0; i < 4; i++) {
+                int nr = r + dir[i].first;
+                int nc = c + dir[i].second;
+
+                if(nr < 0 || nr >= n || nc < 0 || nc >= m)
+                    continue;
+
+                int wt = (grid[r][c] == i + 1) ? 0 : 1;
+
+                if(cost + wt < dist[nr][nc]) {
+                    dist[nr][nc] = cost + wt;
+                    pq.push({dist[nr][nc], nr, nc});
+                }
+            }
+        }
+
+        return dist[n - 1][m - 1];
     }
 };
 
