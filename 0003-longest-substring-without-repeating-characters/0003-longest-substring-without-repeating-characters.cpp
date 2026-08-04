@@ -6,8 +6,8 @@ public:
         int n = s.length();
         int r = 0;
         while(r<n){
-            while(lastIndex[s[r]]>=l){
-                l++;
+            if(lastIndex[s[r]]>=l){
+               l = lastIndex[s[r]]+1;
             }
             lastIndex[s[r]] = r;
             maxLen = max(maxLen,r-l+1);
