@@ -1,36 +1,36 @@
 class Solution {
 public:
     int maxFrequency(vector<int>& nums, int k, int numOperations) {
+        int maxi = *max_element(nums.begin(),nums.end());
         int n = nums.size();
         unordered_map<int, int> freq;
         for (int v : nums) freq[v]++;
 
-        vector<int> sortedNums = nums;
-        sort(sortedNums.begin(), sortedNums.end());
-
-        // Candidate targets: every point where s(x) or cnt[x] can change
-        vector<int> candidates;
-        candidates.reserve(3 * n);
+        map<int,int> mp;
+        sort(nums.begin(),nums.end());
         for (int v : nums) {
-            candidates.push_back(v - k);
-            candidates.push_back(v);
-            candidates.push_back(v + k + 1);
+            mp[v-k]++;
+
+            mp[v+k+1]--;
+            mp[v]+=0;
         }
-        sort(candidates.begin(), candidates.end());
-        candidates.erase(unique(candidates.begin(), candidates.end()), candidates.end());
+        int cumsum = 0;
+        int ans = INT_MIN;
+        for(auto it = mp.begin() ; it!=mp.end() ; it++){
+            it->second += cumsum;
 
-        int lo = 0, hi = 0, ans = 0;
-        for (int x : candidates) {
-            // Window [x-k, x+k] translates monotonically as x increases
-            while (hi < n && sortedNums[hi] <= x + k) hi++;
-            while (lo < n && sortedNums[lo] < x - k) lo++;
+            int target = it->first;
+            int fr = freq[target];
 
-            int s = hi - lo;                       // total reachable count
-            int same = freq.count(x) ? freq[x] : 0; // free matches at x
-            ans = max(ans, min(s, same + numOperations));
+            int required = it->second - fr;
+            
+            ans = max(ans, fr + min(numOperations,required));
+            cumsum = it->second;
         }
 
         return ans;
+
+
     }
 };
 
