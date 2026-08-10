@@ -1,58 +1,46 @@
 class Solution {
 public:
 
-    // After deleting one character, continue expanding
-    int expandAfterDelete(string &s, int l, int r) {
-
-        int n = s.size();
-
-        while (l >= 0 && r < n && s[l] == s[r]) {
-            l--;
-            r++;
-        }
-
-        // Length of the substring covered
-        return r - l - 1;
-    }
-
-
-    // Try one center
-    int check(string &s, int l, int r) {
-
-        int n = s.size();
-
-        // Step 1: Normal palindrome expansion
-        while (l >= 0 && r < n && s[l] == s[r]) {
-            l--;
-            r++;
-        }
-
-        // Now either:
-        // 1. We went outside the string
-        // 2. We found the first mismatch
-
-        // Option 1: Delete s[l]
-        int len1 = expandAfterDelete(s, l - 1, r);
-
-        // Option 2: Delete s[r]
-        int len2 = expandAfterDelete(s, l, r + 1);
-
-        return min(n, max(len1, len2));
-    }
-
 
     int almostPalindromic(string s) {
 
         int n = s.size();
         int ans = 0;
+        
+        //appling bottom up dp 
 
-        for (int i = 0; i < n; i++) {
+        vector<vector<bool> >pal(n,vector<bool>(n,false));
+        vector<vector<bool> >dp(n,vector<bool>(n,false));
+        for(int i = 0 ; i< n; i++){
+            pal[i][i] = true;
+            dp[i][i] = true;
+        }
 
-            // Odd length center
-            ans = max(ans, check(s, i, i));
+        for(int i = n-1 ; i>=0 ; i--){
+            for(int j = i+1 ; j<n ; j++){
+                if(s[i]==s[j]){
+                    if (j - i == 1) pal[i][j] = true;
+                    else{
+                        pal[i][j] = pal[i+1][j-1];
+                    }
+                }
+            }
+        }
 
-            // Even length center
-            ans = max(ans, check(s, i, i + 1));
+        for(int i = n-1 ; i>=0 ; i--){
+            for(int j = i+1 ; j<n ; j++){
+
+                if(s[i]==s[j]){
+                    if (j - i == 1) dp[i][j] = true;
+                    else dp[i][j] = dp[i+1][j-1];
+                }
+                else{
+                    bool dleft = pal[i][j-1];
+                    bool dright = pal[i+1][j];
+                    dp[i][j] = dleft || dright ;
+                }
+                if(dp[i][j]) ans = max(ans,j-i+1);
+            }
         }
 
         return ans;
