@@ -1,53 +1,58 @@
 class Solution {
 public:
-    int almostPalindromic(string s) {
+
+    // After deleting one character, continue expanding
+    int expandAfterDelete(string &s, int l, int r) {
+
         int n = s.size();
 
-        auto expand = [&](int l, int r) {
-            
-            // Step 1: normal palindrome expansion
-            while (l >= 0 && r < n && s[l] == s[r]) {
-                l--;
-                r++;
-            }
+        while (l >= 0 && r < n && s[l] == s[r]) {
+            l--;
+            r++;
+        }
 
-            // First mismatch occurred at (l, r)
+        // Length of the substring covered
+        return r - l - 1;
+    }
 
-            // Option 1: delete s[l]
-            int l1 = l - 1;
-            int r1 = r;
 
-            // Option 2: delete s[r]
-            int l2 = l;
-            int r2 = r + 1;
+    // Try one center
+    int check(string &s, int l, int r) {
 
-            // Continue expansion after deleting left character
-            while (l1 >= 0 && r1 < n && s[l1] == s[r1]) {
-                l1--;
-                r1++;
-            }
+        int n = s.size();
 
-            // Continue expansion after deleting right character
-            while (l2 >= 0 && r2 < n && s[l2] == s[r2]) {
-                l2--;
-                r2++;
-            }
+        // Step 1: Normal palindrome expansion
+        while (l >= 0 && r < n && s[l] == s[r]) {
+            l--;
+            r++;
+        }
 
-            int option1 = r1 - l1 - 1;
-            int option2 = r2 - l2 - 1;
+        // Now either:
+        // 1. We went outside the string
+        // 2. We found the first mismatch
 
-            return min(n, max(option1, option2));
-        };
+        // Option 1: Delete s[l]
+        int len1 = expandAfterDelete(s, l - 1, r);
 
+        // Option 2: Delete s[r]
+        int len2 = expandAfterDelete(s, l, r + 1);
+
+        return min(n, max(len1, len2));
+    }
+
+
+    int almostPalindromic(string s) {
+
+        int n = s.size();
         int ans = 0;
 
         for (int i = 0; i < n; i++) {
 
-            // Odd-length center
-            ans = max(ans, expand(i, i));
+            // Odd length center
+            ans = max(ans, check(s, i, i));
 
-            // Even-length center
-            ans = max(ans, expand(i, i + 1));
+            // Even length center
+            ans = max(ans, check(s, i, i + 1));
         }
 
         return ans;
