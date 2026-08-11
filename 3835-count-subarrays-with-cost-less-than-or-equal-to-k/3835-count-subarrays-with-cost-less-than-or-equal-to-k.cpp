@@ -1,28 +1,152 @@
 class Solution {
 public:
-    long long countSubarrays(vector<int>& nums, long long k) {
+
+    vector<long long> segMax, segMin;
+
+    // Root node = 0
+    void build(int node, int l, int r, vector<int>& nums) {
+
+        if (l == r) {
+            segMax[node] = nums[l];
+            segMin[node] = nums[l];
+            return;
+        }
+
+        int mid = (l + r) / 2;
+
+        build(2 * node + 1, l, mid, nums);
+        build(2 * node + 2, mid + 1, r, nums);
+
+        segMax[node] = max(
+            segMax[2 * node + 1],
+            segMax[2 * node + 2]
+        );
+
+        segMin[node] = min(
+            segMin[2 * node + 1],
+            segMin[2 * node + 2]
+        );
+    }
+
+    long long queryMax(
+        int node,
+        int l,
+        int r,
+        int ql,
+        int qr
+    ) {
+
+        // Completely outside
+        if (qr < l || r < ql)
+            return LLONG_MIN;
+
+        // Completely inside
+        if (ql <= l && r <= qr)
+            return segMax[node];
+
+        int mid = (l + r) / 2;
+
+        return max(
+            queryMax(
+                2 * node + 1,
+                l,
+                mid,
+                ql,
+                qr
+            ),
+
+            queryMax(
+                2 * node + 2,
+                mid + 1,
+                r,
+                ql,
+                qr
+            )
+        );
+    }
+
+    long long queryMin(
+        int node,
+        int l,
+        int r,
+        int ql,
+        int qr
+    ) {
+
+        // Completely outside
+        if (qr < l || r < ql)
+            return LLONG_MAX;
+
+        // Completely inside
+        if (ql <= l && r <= qr)
+            return segMin[node];
+
+        int mid = (l + r) / 2;
+
+        return min(
+            queryMin(
+                2 * node + 1,
+                l,
+                mid,
+                ql,
+                qr
+            ),
+
+            queryMin(
+                2 * node + 2,
+                mid + 1,
+                r,
+                ql,
+                qr
+            )
+        );
+    }
+
+    long long countSubarrays(
+        vector<int>& nums,
+        long long k
+    ) {
+
         int n = nums.size();
-        deque<int>maxi;
-        deque<int>mini;
+
+        segMax.resize(4 * n);
+        segMin.resize(4 * n);
+
+        // Root starts from 0
+        build(0, 0, n - 1, nums);
+
         int left = 0;
         long long ans = 0;
 
-        for(int right = 0 ; right<n ; right++){
-            while(maxi.size() && nums[maxi.back()] <= nums[right]){
-                maxi.pop_back();
-            }
-            while(mini.size() && nums[mini.back()] >= nums[right]){
-                mini.pop_back();
-            }
-            maxi.push_back(right);
-            mini.push_back(right);
+        for (int right = 0; right < n; right++) {
 
-            while(left<=right && (long long)(nums[maxi.front()] - nums[mini.front()])*(right-left +1) > k){
-                if(maxi.front() == left) maxi.pop_front();
-                if(mini.front() == left) mini.pop_front();
+            while (left <= right) {
+
+                long long mx = queryMax(
+                    0,
+                    0,
+                    n - 1,
+                    left,
+                    right
+                );
+
+                long long mn = queryMin(
+                    0,
+                    0,
+                    n - 1,
+                    left,
+                    right
+                );
+
+                long long len = right - left + 1;
+
+                if ((mx - mn) * len <= k)
+                    break;
+
                 left++;
             }
-            ans += (right-left+1);
+
+            ans += right - left + 1;
         }
 
         return ans;
