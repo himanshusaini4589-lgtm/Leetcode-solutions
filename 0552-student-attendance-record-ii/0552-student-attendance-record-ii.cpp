@@ -4,52 +4,48 @@ public:
 
     int checkRecord(int n) {
 
-        // dp[L][A]
-        // L = consecutive L's at the end
-        // A = number of A's used
-
-        long long dp[3][2] = {};
+        vector<vector<vector<long long>>> dp(
+            n + 1,
+            vector<vector<long long>>(3, vector<long long>(2, 0))
+        );
 
         // Empty string
-        dp[0][0] = 1;
+        dp[0][0][0] = 1;
 
         for (int len = 0; len < n; len++) {
-
-            long long ndp[3][2] = {};
 
             for (int L = 0; L < 3; L++) {
                 for (int A = 0; A < 2; A++) {
 
-                    long long cur = dp[L][A];
+                    long long cur = dp[len][L][A];
+
+                    if (cur == 0)
+                        continue;
 
                     // Add P
-                    ndp[0][A] =
-                        (ndp[0][A] + cur) % MOD;
+                    dp[len + 1][0][A] =
+                        (dp[len + 1][0][A] + cur) % MOD;
 
                     // Add L
                     if (L < 2) {
-                        ndp[L + 1][A] =
-                            (ndp[L + 1][A] + cur) % MOD;
+                        dp[len + 1][L + 1][A] =
+                            (dp[len + 1][L + 1][A] + cur) % MOD;
                     }
 
                     // Add A
                     if (A < 1) {
-                        ndp[0][A + 1] =
-                            (ndp[0][A + 1] + cur) % MOD;
+                        dp[len + 1][0][A + 1] =
+                            (dp[len + 1][0][A + 1] + cur) % MOD;
                     }
                 }
             }
-
-            // Move to next length
-            memcpy(dp, ndp, sizeof(dp));
         }
 
-        // Every state after n characters is valid
         long long ans = 0;
 
         for (int L = 0; L < 3; L++) {
             for (int A = 0; A < 2; A++) {
-                ans = (ans + dp[L][A]) % MOD;
+                ans = (ans + dp[n][L][A]) % MOD;
             }
         }
 
