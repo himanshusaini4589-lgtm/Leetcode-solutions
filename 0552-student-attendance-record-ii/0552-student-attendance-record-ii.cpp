@@ -21,7 +21,7 @@ public:
 
                     if (cur == 0)
                         continue;
-
+                        
                     // Add P
                     dp[len + 1][0][A] =
                         (dp[len + 1][0][A] + cur) % MOD;
