@@ -1,31 +1,45 @@
 class Solution {
 public:
     int maxTurbulenceSize(vector<int>& arr) {
+
         int n = arr.size();
 
-        if (n == 1) return 1;
+        if (n == 1)
+            return 1;
 
-        int l = 0;
-        int maxlen = 1;
+        int len = 1;
+        int ans = 1;
 
-        for (int r = 1; r < n; r++) {
+        int prevSign = 0;
 
-            if (arr[r] == arr[r - 1]) {
-                l = r;
+        for (int i = 1; i < n; i++) {
+
+            int currSign = 0;
+
+            if (arr[i] > arr[i - 1])
+                currSign = 1;
+            else if (arr[i] < arr[i - 1])
+                currSign = -1;
+
+            if (currSign == 0) {
+                // equal elements
+                len = 1;
             }
-            else if (r == 1 ||
-                     (arr[r] > arr[r - 1] && arr[r - 1] < arr[r - 2]) ||
-                     (arr[r] < arr[r - 1] && arr[r - 1] > arr[r - 2])) {
-
-                maxlen = max(maxlen, r - l + 1);
+            else if (prevSign == 0 || currSign != prevSign) {
+                // alternate -> extend
+                len++;
             }
             else {
-                l = r - 1;
-                maxlen = max(maxlen, r - l + 1);
+                // same sign -> restart
+                len = 2;
             }
+
+            ans = max(ans, len);
+
+            prevSign = currSign;
         }
 
-        return maxlen;
+        return ans;
     }
 };
 
