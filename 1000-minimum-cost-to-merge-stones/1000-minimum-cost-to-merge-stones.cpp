@@ -1,37 +1,50 @@
 class Solution {
 public:
-    int mergeStones(vector<int>& stones, int K) {
+    vector<vector<int>> dp;
+    vector<int> prefix;
+    int K;
+
+    int getSum(int i, int j) {
+        return prefix[j + 1] - prefix[i];
+    }
+
+    int f(int i, int j) {
+        if (i == j)
+            return 0;
+
+        if (dp[i][j] != -1)
+            return dp[i][j];
+
+        int ans = INT_MAX;
+
+        for (int m = i; m < j; m += K - 1) {
+            ans = min(ans,
+                      f(i, m) + f(m + 1, j));
+        }
+
+        if ((j - i) % (K - 1) == 0) {
+            ans += getSum(i, j);
+        }
+
+        return dp[i][j] = ans;
+    }
+
+    int mergeStones(vector<int>& stones, int k) {
+        K = k;
         int n = stones.size();
 
-        if ((n - 1) % (K - 1) != 0) return -1;
+        if ((n - 1) % (K - 1) != 0)
+            return -1;
 
-        vector<int> prefix(n + 1, 0);
+        prefix.assign(n + 1, 0);
 
         for (int i = 0; i < n; i++) {
             prefix[i + 1] = prefix[i] + stones[i];
         }
 
-        vector<vector<int>> dp(n, vector<int>(n, 0));
+        dp.assign(n, vector<int>(n, -1));
 
-        for (int g = 1; g < n; g++) {
-            for (int i = 0, j = g; j < n; i++, j++) {
-
-                int ans = 1e9;
-
-                for (int mid = i; mid < j; mid += K - 1) {
-                    ans = min(ans, dp[i][mid] + dp[mid + 1][j]);
-                }
-
-                dp[i][j] = ans;
-
-                // Current interval can finally become one pile
-                if (g % (K - 1) == 0) {
-                    dp[i][j] += prefix[j + 1] - prefix[i];
-                }
-            }
-        }
-
-        return dp[0][n - 1];
+        return f(0, n - 1);
     }
 };
 
