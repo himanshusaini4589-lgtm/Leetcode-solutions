@@ -23,20 +23,24 @@ public:
                 //If we encounter an 'e' and the variable has value less than 2, then increment it.
 
                 pick= (pick +find(index+1,n,e+1,l,t))%mod;
+                continue;
             }
 
             else if(i==11 && l<1){
                 //If we encounter an 'l' and the variable has value less than 1, then increment it.
 
                 pick= (pick +find(index+1,n,e,l+1,t))%mod;
+                continue;
+
             }
             else if(i==19 && t<1){
                 //If we encounter an 't' and the variable has value less than 1, then increment it.
 
                 pick= (pick +find(index+1,n,e,l,t+1))%mod;
+                continue;
             }
             //Otherwise, just loop forward adding this possibility of i.
-            else pick= (pick +find(index+1,n,e,l,t))%mod;
+            pick= (pick +find(index+1,n,e,l,t))%mod;
             
         }
 
