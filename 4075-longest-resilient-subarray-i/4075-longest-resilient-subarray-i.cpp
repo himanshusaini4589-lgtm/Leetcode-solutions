@@ -21,6 +21,7 @@ public:
                     maxi = max(maxi, len);
                 }
             }
+            if(maxi >= (n-l)) break;
         }
 
         return maxi;
