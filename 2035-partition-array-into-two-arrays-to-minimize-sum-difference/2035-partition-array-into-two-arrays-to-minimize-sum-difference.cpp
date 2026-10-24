@@ -45,11 +45,11 @@ class Solution {
                     long long sum = curr + *it;
                     mini = min(mini,abs(totalsum-2*sum));
                 }
-                if(it != subsetsumb[n1-i].begin()){
-                    --it;
-                    long long sum = curr + *it;
-                    mini = min(mini,abs(totalsum-2*sum));
-                }
+                // if(it != subsetsumb[n1-i].begin()){
+                //     --it;
+                //     long long sum = curr + *it;
+                //     mini = min(mini,abs(totalsum-2*sum));
+                // }
             }
         }
         return mini;
