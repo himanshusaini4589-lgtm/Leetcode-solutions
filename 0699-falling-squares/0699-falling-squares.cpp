@@ -1,84 +1,86 @@
 class Solution {
 public:
-    vector<int> tree, lazy;
-    
-    void build(int node, int start, int end) {
-        tree[node] = 0;
-    }
-    
-    void pushDown(int node) {
-        if (lazy[node] != 0) {
-            for (int child : {2*node, 2*node+1}) {
-                tree[child] = max(tree[child], lazy[node]);
-                lazy[child] = max(lazy[child], lazy[node]);
-            }
-            lazy[node] = 0;
+    vector<int>segT;
+    vector<int>lazy;
+    void prop(int i,int l,int r){
+        if(lazy[i]==0) return ;
+        
+        if(l!=r){
+            segT[2*i+1] = lazy[i];
+            segT[2*i+2] = lazy[i];
+            lazy[2*i+1] = lazy[i];
+            lazy[2*i+2] = lazy[i];
         }
+        lazy[i] = 0 ;
     }
-    
-    void update(int node, int start, int end, int l, int r, int val) {
-        if (r < start || end < l) return;              // no overlap
-        if (l <= start && end <= r) {                   // fully covered
-            tree[node] = max(tree[node], val);
-            lazy[node] = max(lazy[node], val);
+    void update(int i ,int l,int r,int ql,int qr,int val){
+        prop(i,l,r);
+
+        if(l > qr || r < ql) return;
+
+        if(ql <=l && r <= qr){
+            segT[i] = val;
+            lazy[i] = val;
             return;
         }
-        pushDown(node);
-        int mid = (start + end) / 2;
-        update(2*node, start, mid, l, r, val);
-        update(2*node+1, mid+1, end, l, r, val);
-        tree[node] = max(tree[2*node], tree[2*node+1]);
+
+
+        int mid = l + (r-l)/2;
+
+        update(2*i+1, l, mid, ql, qr, val);
+
+        update(2*i+2, mid+1, r, ql, qr, val);
+        segT[i] = max(segT[2*i+1],segT[2*i+2]);
     }
-    
-    int query(int node, int start, int end, int l, int r) {
-        if (r < start || end < l) return 0;              // no overlap
-        if (l <= start && end <= r) return tree[node];   // fully covered
-        pushDown(node);
-        int mid = (start + end) / 2;
-        return max(query(2*node, start, mid, l, r),
-                    query(2*node+1, mid+1, end, l, r));
+
+    int query(int i,int l,int r,int ql,int qr){
+        if(l>qr || r<ql){
+            return 0;
+        }
+        prop(i,l,r);
+        if(ql<=l && r<=qr){
+            return segT[i];
+        }
+        int mid = l + (r-l)/2;
+        return max(query(2*i+1,l,mid,ql,qr),query(2*i+2,mid+1,r,ql,qr));
     }
-    
+
     vector<int> fallingSquares(vector<vector<int>>& positions) {
-        int n = positions.size();
-        
-        // Step 1: Coordinate compression
         vector<int> coords;
-        for (auto& p : positions) {
-            coords.push_back(p[0]);              // left
-            coords.push_back(p[0] + p[1]);        // right
+
+        for (auto &p : positions) {
+
+            coords.push_back(p[0]);
+
+            coords.push_back(p[0] + p[1]);
+
         }
+
         sort(coords.begin(), coords.end());
+
         coords.erase(unique(coords.begin(), coords.end()), coords.end());
-        
-        int m = coords.size();
-        tree.assign(4 * m, 0);
-        lazy.assign(4 * m, 0);
-        
-        vector<int> ans;
-        int runningMax = 0;
-        
-        for (int i = 0; i < n; i++) {
-            int left = positions[i][0];
-            int right = left + positions[i][1];
-            int side = positions[i][1];
-            
-            // map to compressed indices
-            int l_idx = lower_bound(coords.begin(), coords.end(), left) - coords.begin();
-            int r_idx = lower_bound(coords.begin(), coords.end(), right) - coords.begin();
-            
-            // query max height in [l_idx, r_idx - 1] (right is exclusive, so stop before it)
-            int base = query(1, 0, m-1, l_idx, r_idx - 1);
-            int newHeight = base + side;
-            
-            // update that range to newHeight
-            update(1, 0, m-1, l_idx, r_idx - 1, newHeight);
-            
-            runningMax = max(runningMax, newHeight);
-            ans.push_back(runningMax);
+
+        int n = coords.size();
+        segT.resize(4*n,0);
+        lazy.resize(4*n,0);
+        vector<int> result;
+        int maxHeight = 0;
+        for(auto ele : positions){
+            int x = ele[0];
+            int sz = ele[1];
+            int y = x + sz;
+            int l = lower_bound(coords.begin(),coords.end(),x) - coords.begin();
+            int r = lower_bound(coords.begin(),coords.end(),y) - coords.begin()-1;
+            int height = query(0,0,n-1,l,r) + sz;
+           
+            update(0,0,n-1,l,r,height);
+
+            maxHeight = max(maxHeight, height);
+
+            result.push_back(maxHeight);
         }
-        
-        return ans;
+
+        return result;
     }
 };
 
