@@ -17,13 +17,13 @@ public:
             for(int i = 0 ; i<s.size(); i++){
                 char original = s[i];
                 for(char ch = 'a' ; ch<='z' ; ch++){
-                    word[i] = ch;
-                    if(st.find(word)!=st.end()){
-                        q.push({word,val+1});
-                        st.erase(word);
+                    s[i] = ch;
+                    if(st.find(s)!=st.end()){
+                        q.push({s,val+1});
+                        st.erase(s);
                     }
                 }
-                word[i] = original;
+                s[i] = original;
             }
         }
         return ans == INT_MAX ? 0 : ans;
