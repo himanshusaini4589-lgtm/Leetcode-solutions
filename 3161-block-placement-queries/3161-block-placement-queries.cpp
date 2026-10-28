@@ -1,69 +1,116 @@
 class Solution {
 public:
-    int n = 50000;
-    vector<int> segTree;
-    void construct(int n){
-        segTree.resize(4*n,0);
-    }
+    vector<int> seg;
+    int n;
 
-    void update(int idx,int val ,int i,int l ,int r){
-        if(l==r){
-            segTree[i] = val;
+    void update(int node, int l, int r, int idx, int val) {
+        if (l == r) {
+            seg[node] = val;
             return;
         }
-        int mid = l + (r-l)/2;
-        if(idx<=mid){
-            update(idx,val,2*i+1,l,mid);
-        }
-        else{
-            update(idx,val,2*i+2,mid+1,r);
+
+        int mid = (l + r) / 2;
+
+        if (idx <= mid) {
+            update(2 * node, l, mid, idx, val);
+        } else {
+            update(2 * node + 1, mid + 1, r, idx, val);
         }
 
-        segTree[i] = max(segTree[2*i+1],segTree[2*i+2]);
+        seg[node] = max(seg[2 * node], seg[2 * node + 1]);
     }
 
-    int query(int i,int l,int r,int q_l,int q_r){
-        if(q_l>r || q_r<l){
+    int query(int node, int l, int r, int ql, int qr) {
+        if (qr < l || r < ql) {
             return 0;
         }
-        if(q_l<=l && q_r >=r){
-            return segTree[i];
-        }
-        int mid = l + (r-l)/2;
 
-        return max(query(2*i+1,l,mid,q_l,q_r),query(2*i+2,mid+1,r,q_l,q_r));
+        if (ql <= l && r <= qr) {
+            return seg[node];
+        }
+
+        int mid = (l + r) / 2;
+
+        return max(
+            query(2 * node, l, mid, ql, qr),
+            query(2 * node + 1, mid + 1, r, ql, qr)
+        );
     }
+
     vector<bool> getResults(vector<vector<int>>& queries) {
-        construct(50000);
-        set<int>st;
-        st.insert(0);
-        vector<bool> res;
-        for(auto &q : queries){
-            if(q[0]==1){
-                int x = q[1];
-                auto it = st.upper_bound(x);
-                int nxt = (it) != st.end() ? *it : -1;
-                int pre = *prev(it);
-                update(x,x-pre,0,0,n-1);
-                if(nxt!=-1) update(nxt, nxt-x,0,0,n-1);
-                st.insert(q[1]);
+        vector<int> coords = {0};
+
+        for (auto& q : queries) {
+            if (q[0] == 1) {
+                coords.push_back(q[1]);
             }
-            else{
-                int x= q[1];
+        }
+
+        sort(coords.begin(), coords.end());
+
+        coords.erase(
+            unique(coords.begin(), coords.end()),
+            coords.end()
+        );
+
+        n = coords.size();
+        seg.assign(4 * n + 5, 0);
+
+        set<int> obstacles;
+        obstacles.insert(0);
+
+        vector<bool> ans;
+
+        for (auto& q : queries) {
+            if (q[0] == 1) {
+                int x = q[1];
+
+                auto it = obstacles.lower_bound(x);
+
+                int nxt = -1;
+
+                if (it != obstacles.end()) {
+                    nxt = *it;
+                }
+
+                int pre = *prev(it);
+
+                obstacles.insert(x);
+
+                int idx = lower_bound(
+                    coords.begin(), coords.end(), x
+                ) - coords.begin();
+
+                update(1, 0, n - 1, idx, x - pre);
+
+                if (nxt != -1) {
+                    int nextIdx = lower_bound(
+                        coords.begin(), coords.end(), nxt
+                    ) - coords.begin();
+
+                    update(1, 0, n - 1, nextIdx, nxt - x);
+                }
+            }
+            else {
+                int x = q[1];
                 int sz = q[2];
 
-                auto it = st.upper_bound(x);
-                int pre = *prev(it);
+                int idx = upper_bound(
+                    coords.begin(), coords.end(), x
+                ) - coords.begin() - 1;
 
-                int maxi = query(0,0,n-1,0,pre);
-                int maxgap = max(x-pre,maxi);
-                if(maxgap>=sz) res.push_back(true);
-                else res.push_back(false);
-                
+                int maxGap = query(1, 0, n - 1, 0, idx);
+
+                auto it = obstacles.upper_bound(x);
+                --it;
+
+                int lastGap = x - *it;
+
+                ans.push_back(max(maxGap, lastGap) >= sz);
             }
-            
         }
-        return res;
+
+        return ans;
     }
 };
 
