@@ -27,7 +27,7 @@ public:
                 temp.pop_back();
                 vis[i] = false;
 
-                if(ans != "") return;
+                //if(ans != "") return;
             }
         }
     }
