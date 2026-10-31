@@ -1,45 +1,45 @@
 class Solution {
 public:
-    
-    // void f(int i,int n ,int cnt,int k,vector<int> &temp){
-    //     if(i>=10) return;
-    //     if(cnt == k){
-    //         if(temp.size() == n) ans = temp;
-    //         return ;
-    //     }
-    //     if(temp.size() == n){
-    //         cnt++;
-    //     }
-    //     if(!nums[i]){
-    //         temp.push_back(i);
-    //         nums[i] = true;
-    //         f(i+1,n,cnt,k,temp);
-    //         temp.pop_back();
-    //         nums[i] = false;
-    //     }
+    string ans = "";
+    int cnt = 0;
 
-    //     f(i+1,n,cnt,k,temp);
-    // }
+    void f(int n, int k, vector<bool>& vis, string& temp) {
+
+        if(temp.size() == n) {
+            cnt++;
+
+            if(cnt == k) {
+                ans = temp;
+            }
+
+            return;
+        }
+
+        for(int i = 1; i <= n; i++) {
+
+            if(!vis[i]) {
+
+                vis[i] = true;
+                temp.push_back(i + '0');
+
+                f(n, k, vis, temp);
+
+                temp.pop_back();
+                vis[i] = false;
+
+                if(ans != "") return;
+            }
+        }
+    }
+
     string getPermutation(int n, int k) {
-        vector<int>nums;
-        for(int i = 1 ; i<=n ; i++){
-            nums.push_back(i);
-        }
-        int fact = 1;
-        for(int i = 1 ; i<n ; i++){
-            fact *= i;
-        }
-        k--;
-        string s = "";
-        while(nums.size()){
-            int index = k/fact;
-            s += nums[index] + '0';
-           nums.erase(nums.begin() + index);
-           if(nums.size()==0) break;
-            k %= fact;
-            fact/=nums.size();
-        }
-        return s;
+
+        vector<bool> vis(n+1, false);
+        string temp = "";
+
+        f(n, k, vis, temp);
+
+        return ans;
     }
 };
 
