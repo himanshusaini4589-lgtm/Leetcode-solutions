@@ -45,8 +45,19 @@ void solve() {
     int n;
     cin>>n;
     vi v(n);
+    int counti = 0;
     rep(i,0,n){
         cin>>v[i];
+        if(v[i] == 1) counti++;
+    }
+    
+    if(counti>1){
+        cout<<0<<endl;
+        return;
+    }
+    if(counti==1){
+        cout<<1<<endl;
+        return;
     }
     sort(all(v));
     int first = v[0];
