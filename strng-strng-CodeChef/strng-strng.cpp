@@ -1,109 +1,61 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-typedef long long ll;
-typedef unsigned long long ull;
-typedef long double ld;
-typedef pair<int,int> pii;
-typedef pair<ll,ll> pll;
-typedef vector<int> vi;
-typedef vector<ll> vll;
-typedef vector<pii> vpii;
-typedef vector<vi> vvi;
-typedef vector<vll> vvll;
+int main()
+{
+    int t;
+    cin >> t; // number of test cases
+    while (t--)
+    {
+        long long n;
+        cin >> n; // size of the array
+        vector<long long> arr(n);
+        for (long long i = 0; i < n; i++)
+            cin >> arr[i];
 
-#define pb push_back
+        // Key idea:
+        // Let g' = gcd of all elements EXCEPT arr[i].
+        // If we replace arr[i] with any value x, the new gcd = gcd(g', x).
+        //  - If g' == 1: gcd(1, x) = 1 for every x, so the gcd can never change
+        //                -> index i is NOT strong.
+        //  - If g' > 1:  we can get at least two different results
+        //                (x = 1 gives 1, x = g' gives g'), so one of them
+        //                must differ from the current gcd -> index i IS strong.
+        // So: index i is strong  <=>  gcd of all elements except arr[i] > 1.
 
-#define all(x) (x).begin(), (x).end()
-#define rall(x) (x).rbegin(), (x).rend()
+        // prefix_gcd[i] = gcd(arr[0], arr[1], ..., arr[i])
+        vector<long long> prefix_gcd(n);
+        prefix_gcd[0] = arr[0];
+        for (long long i = 1; i < n; i++)
+            prefix_gcd[i] = gcd(prefix_gcd[i - 1], arr[i]);
 
-#define endl '\n'        
-#define rep(i, a, b) for (int i = (a); i < (b); i++)
-#define rrep(i, a, b) for (int i = (a); i >= (b); i--)
-const int MOD = 1e9 + 7;
+        // suffix_gcd[i] = gcd(arr[i], arr[i + 1], ..., arr[n - 1])
+        vector<long long> suffix_gcd(n);
+        suffix_gcd[n - 1] = arr[n - 1];
+        for (long long i = n - 2; i >= 0; i--)
+            suffix_gcd[i] = gcd(suffix_gcd[i + 1], arr[i]);
 
-const ll INF = 1e18;
-const int MAXN = 2e5 + 5;
-
-
-void fastio() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
-}
-
-#ifdef LOCAL
-    #define debug(x) cerr << #x << " = " << (x) << endl;
-    #define debugVec(v) { cerr << #v << " = [ "; for (auto& x : v) cerr << x << " "; cerr << "]" << endl; }
-#else
-    #define debug(x)
-    #define debugVec(v)
-#endif
-
-
-void solve() {
-    int n;
-    cin>>n;
-    vi v(n);
-    int counti = 0;
-    rep(i,0,n){
-        cin>>v[i];
-        if(v[i] == 1) counti++;
-    }
-    
-    if(counti>1){
-        cout<<0<<endl;
-        return;
-    }
-    if(counti==1){
-        cout<<1<<endl;
-        return;
-    }
-    sort(all(v));
-    int first = v[0];
-    int second = v[1];
-    int count = 0;
-    rep(i,2,n){
-        int g1 = __gcd(first,v[i]);
-        int g2 = __gcd(second,v[i]);
-        if(g1==1){
-            count++;
+        long long answer = 0; // count of strong indices
+        for (long long i = 0; i < n; i++)
+        {
+            // g' for index i: combine everything on the left and right of i
+            long long gcd_excluding_i;
+            if (i == 0) // nothing on the left
+                gcd_excluding_i = suffix_gcd[1];
+            else if (i == n - 1) // nothing on the right
+                gcd_excluding_i = prefix_gcd[n - 2];
+            else // left part [0, i-1] and right part [i+1, n-1]
+                gcd_excluding_i = gcd(prefix_gcd[i - 1], suffix_gcd[i + 1]);
+            if (gcd_excluding_i > 1) // changing arr[i] can change the overall gcd
+                answer++;
         }
-        if(g2==1){
-            count++;
-        }
+        cout << answer << endl;
     }
-    int r = __gcd(first,second);
-    if(r==1){
-        count++;
-    }
-    if(count == 1){
-        cout<<1<<endl;
-        return;
-    }
-    else if(count==0){
-        cout<<n<<endl;
-        return;
-    }
-    else{
-        cout<<0<<endl;
-        return;
-    }
-
-}
-
-int main() {
-    fastio();
-
-    int t = 1;
-    cin >> t;         
-    while (t--) {
-        solve();
-    }
-
     return 0;
 }
 
+// Time Complexity: O(n log(max(arr[i])))
+// Space Complexity: O(n)
 
 // Synced seamlessly with LeetHub Pro
 // Pro features: https://bit.ly/leethubpro | Free version: https://bit.ly/leethubv4
